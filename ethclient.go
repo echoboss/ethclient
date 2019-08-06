@@ -78,15 +78,13 @@ func (ec *Client) BlockByNumber(ctx context.Context, number *big.Int) (*types.Bl
 	return ec.getBlock(ctx, "eth_getBlockByNumber", toBlockNumArg(number), true)
 }
 
-
-
 //my add
-func (ec *Client) BlockNumber(ctx context.Context,) (uint64, error) {
+func (ec *Client) BlockNumber(ctx context.Context, ) (uint64, error) {
 
 	var result string
-	err :=  ec.c.CallContext(ctx, &result,"eth_blockNumber",)
+	err := ec.c.CallContext(ctx, &result, "eth_blockNumber", )
 	if err != nil {
-		return 0,err
+		return 0, err
 	}
 	return hexutil.DecodeUint64(result)
 }
@@ -202,21 +200,21 @@ func (tx *rpcTransaction) UnmarshalJSON(msg []byte) error {
 }
 
 // TransactionByHash returns the transaction with the given hash.
-func (ec *Client) TransactionByHash(ctx context.Context, hash common.Hash) (tx *types.Transaction,blockNumber *string,isPending bool, err error) {
+func (ec *Client) TransactionByHash(ctx context.Context, hash common.Hash) (tx *types.Transaction, blockNumber *string, isPending bool, err error) {
 	var json *rpcTransaction
 	err = ec.c.CallContext(ctx, &json, "eth_getTransactionByHash", hash)
 	if err != nil {
-		return nil, nil,false, err
+		return nil, nil, false, err
 	} else if json == nil {
-		return nil, nil,false, ethereum.NotFound
+		return nil, nil, false, ethereum.NotFound
 	} else if _, r, _ := json.tx.RawSignatureValues(); r == nil {
-		return nil, nil,false, fmt.Errorf("server returned transaction without signature")
+		return nil, nil, false, fmt.Errorf("server returned transaction without signature")
 	}
 	if json.From != nil && json.BlockHash != nil {
 		setSenderFromServer(json.tx, *json.From, *json.BlockHash)
 	}
-	fmt.Printf("BlockNumber:  %s\n",*json.BlockNumber)
-	return json.tx,json.BlockNumber,json.BlockNumber == nil, nil
+	//fmt.Printf("BlockNumber:  %s\n", *json.BlockNumber)
+	return json.tx, json.BlockNumber, json.BlockNumber == nil, nil
 }
 
 // TransactionSender returns the sender address of the given transaction. The transaction
@@ -520,7 +518,7 @@ func (ec *Client) EstimateGas(ctx context.Context, msg ethereum.CallMsg) (uint64
 //	return ec.c.CallContext(ctx, nil, "eth_sendRawTransaction", common.ToHex(data))
 //}
 
-func (ec *Client) SendTransaction(ctx context.Context, tx string) (string,error) {
+func (ec *Client) SendTransaction(ctx context.Context, tx string) (string, error) {
 	//data, err := rlp.EncodeToBytes(tx)
 	//	//if err != nil {
 	//	//	return err
@@ -528,11 +526,11 @@ func (ec *Client) SendTransaction(ctx context.Context, tx string) (string,error)
 
 	var result string
 
-	err :=  ec.c.CallContext(ctx, &result, "eth_sendRawTransaction", tx)
+	err := ec.c.CallContext(ctx, &result, "eth_sendRawTransaction", tx)
 	if err != nil {
-		return "",err
+		return "", err
 	}
-	return result,nil
+	return result, nil
 }
 
 func toCallArg(msg ethereum.CallMsg) interface{} {
